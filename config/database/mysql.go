@@ -9,12 +9,10 @@ import (
 	"time"
 )
 
-const dsn = ""
-
 // MysqlInit 初始化mysql
 func MysqlInit() {
 	var err error
-	global.MysqlClient, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	global.MysqlClient, err = gorm.Open(mysql.Open(global.MysqlAddress), &gorm.Config{})
 	if err != nil {
 		log.Fatalln("Mysql数据库连接失败:", err)
 	}
@@ -29,7 +27,7 @@ func MysqlInit() {
 		global.UserTable = global.MysqlClient.Table("user")
 		global.RoleTable = global.MysqlClient.Table("role")
 		global.ApiTable = global.MysqlClient.Table("api")
-		global.LogTable = global.MysqlClient.Table("log")
+		global.RoleApiTable = global.MysqlClient.Table("role_apis")
 	}
 	fmt.Println("mysql连接成功")
 }

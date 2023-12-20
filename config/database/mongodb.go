@@ -11,7 +11,7 @@ import (
 
 func MongodbInit() {
 	if global.MongodbClient403 == nil {
-		global.MongodbClient403 = getMongodbClient("")
+		global.MongodbClient403 = getMongodbClient(global.MongodbAddress)
 	}
 	smartGraphiteHBClone := global.MongodbClient403.Database("smartGraphiteHB-Clone")
 	{

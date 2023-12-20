@@ -1,15 +1,16 @@
 package main
 
 import (
-	"dataTool/config/database"
-	"fmt"
+	"dataTool/internal/router"
 )
 
 func init() {
-	database.InitDataBase()
-
+	InitDataBase()
 }
 
 func main() {
-	fmt.Println("633")
+	engine := router.GetEngine()
+	if err := engine.Run(":8091"); err != nil {
+		panic(err)
+	}
 }

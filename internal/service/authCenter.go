@@ -1,7 +1,7 @@
 package service
 
 import (
-	"dataTool/config/global"
+	global2 "dataTool/initialize/global"
 	"dataTool/internal/model"
 	"dataTool/pkg/utils"
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 func CreateApi(api model.Api) utils.Response {
-	tx := global.ApiTable.Begin()
+	tx := global2.ApiTable.Begin()
 	if api.Name == " " || api.Url == " " || len(api.Url) >= 20 || len(api.Name) >= 10 || (api.Method != "GET" && api.Method != "POST" && api.Method != "PUT" && api.Method != "DELETE") {
 		return utils.ErrorMess("参数错误", nil)
 	}
@@ -24,7 +24,7 @@ func CreateApi(api model.Api) utils.Response {
 	if res.Error == gorm.ErrRecordNotFound {
 		time0 := time.Now()
 		api.CreateTime = &time0
-		api.Id = global.ApiSnowFlake.Generate().Int64()
+		api.Id = global2.ApiSnowFlake.Generate().Int64()
 		res = tx.Create(&api)
 		if res.Error != nil {
 			tx.Rollback()
@@ -37,7 +37,7 @@ func CreateApi(api model.Api) utils.Response {
 }
 
 func DeletedApi(idString string) utils.Response {
-	tx := global.ApiTable.Begin()
+	tx := global2.ApiTable.Begin()
 	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		tx.Rollback()
@@ -53,7 +53,7 @@ func DeletedApi(idString string) utils.Response {
 }
 
 func UpdateApi(api model.Api) utils.Response {
-	tx := global.ApiTable.Begin()
+	tx := global2.ApiTable.Begin()
 	fmt.Println(api)
 	if api.Id == 0 || api.Name == "" || api.Url == "" || len(api.Url) >= 20 || len(api.Name) >= 10 || (api.Method != "GET" && api.Method != "POST" && api.Method != "PUT" && api.Method != "DELETE") {
 		return utils.ErrorMess("失败,参数错误", nil)
@@ -81,7 +81,7 @@ func GetApi(name, currPage, pageSize, startTime, endTime string) utils.Response 
 	if err != nil {
 		return utils.ErrorMess("失败", err.Error())
 	}
-	tx := global.ApiTable.Begin()
+	tx := global2.ApiTable.Begin()
 	if startTime != "" && endTime != "" {
 		tx = tx.Where("createTime >= ? and createTime <=?", startTime, endTime)
 	}

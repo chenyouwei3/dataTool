@@ -1,7 +1,7 @@
 package database
 
 import (
-	"dataTool/config/global"
+	"dataTool/initialize/global"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
 )

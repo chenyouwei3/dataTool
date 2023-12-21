@@ -1,18 +1,22 @@
-package main
+package initialize
 
 import (
 	"context"
-	"dataTool/config/database"
-	"dataTool/config/global"
+	"dataTool/initialize/database"
+	"dataTool/initialize/global"
+
 	"fmt"
 )
 
 func InitDataBase() {
-	//defer CloseDB()
 	database.MongodbInit()
 	database.SnowFlakeInit()
 	database.MysqlInit()
 	database.RedisInit()
+}
+
+func InitChan() {
+	global.SukonCloudChan()
 }
 
 func CloseDB() {

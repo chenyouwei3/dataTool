@@ -3,7 +3,7 @@ package controller
 import (
 	"dataTool/internal/model"
 	"dataTool/internal/service"
-	"dataTool/pkg/utils/e"
+	e2 "dataTool/pkg/e"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,7 +11,7 @@ import (
 func CreateApi(c *gin.Context) {
 	var api model.Api
 	if err := c.Bind(&api); err != nil {
-		c.JSON(e.ParameterStructError, e.GetMsg(e.ParameterStructError))
+		c.JSON(e2.ParameterStructError, e2.GetMsg(e2.ParameterStructError))
 		return
 	}
 	c.JSON(http.StatusOK, service.CreateApi(api))
@@ -20,7 +20,7 @@ func CreateApi(c *gin.Context) {
 func DeletedApi(c *gin.Context) {
 	id := c.Query("id")
 	if id == " " {
-		c.JSON(e.ParameterError, e.GetMsg(e.ParameterError))
+		c.JSON(e2.ParameterError, e2.GetMsg(e2.ParameterError))
 		return
 	}
 	c.JSON(http.StatusOK, service.DeletedApi(id))
@@ -29,7 +29,7 @@ func DeletedApi(c *gin.Context) {
 func UpdatedApi(c *gin.Context) {
 	var api model.Api
 	if err := c.Bind(&api); err != nil {
-		c.JSON(e.ParameterStructError, e.GetMsg(e.ParameterStructError))
+		c.JSON(e2.ParameterStructError, e2.GetMsg(e2.ParameterStructError))
 		return
 	}
 	c.JSON(http.StatusOK, service.UpdateApi(api))

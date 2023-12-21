@@ -1,7 +1,7 @@
 package database
 
 import (
-	"dataTool/config/global"
+	"dataTool/initialize/global"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

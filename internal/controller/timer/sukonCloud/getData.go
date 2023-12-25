@@ -15,7 +15,6 @@ import (
 // 获取plc
 func BoxPlc(boxId string) {
 	//boxId := <-global.SendBoxTaskChan
-	fmt.Println("第几个:", boxId)
 	URL := "http://sukon-cloud.com/api/v1/base/boxPlcs"
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
@@ -25,7 +24,12 @@ func BoxPlc(boxId string) {
 	if err != nil {
 		log.Println("请求错误:", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("获取boxplc关闭连接处理错误1:", err)
+		}
+	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
@@ -57,7 +61,12 @@ func FindVariant(boxId, plcId string) {
 	if err != nil {
 		log.Println("请求错误:", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("获取变量失败:", err)
+		}
+	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
@@ -104,21 +113,27 @@ func FindVariant(boxId, plcId string) {
 		SensorName: "",
 		Detail:     detail,
 	})
-	GetBoxRealTimeData(variantIds, box) //获取实时数据
+	GetBoxRealTimeData(variantIds, box) //获取实时数据;
 }
 
 // 获取实时数据
 func GetBoxRealTimeData(variantIds string, box model.Box) {
-	var data model.RealtimeData
+	fmt.Println("boxid", box.BoxId)
 	URL := "http://sukon-cloud.com/api/v1/data/realtimeDatas"
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("variantIds", variantIds)
+	var data model.RealtimeData
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("获取实时数据失败:", err)
+		}
+	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
@@ -134,7 +149,7 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	case "b46a0faf11cc4000a4c290eba5cc949a":
 		service.StoreWestAirCarData(box, data) //西跨吸料天车x
 	case "be67c2b8216e49e8981a95663413f115":
-		service.StoreGraphitingData(box, data) //石墨化
+		service.StoreGraphitingData(box, data) //石墨化x
 	case "5cba298477bc456ab1a2bd06e35cb0d8":
 		service.StoreTunnelWetElectricData(box, data) //隧道窑湿电x
 	case "01e844f884844aa2bb5d1cab87316c17":
@@ -152,9 +167,9 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	case "65d27a491d744a0e91b4d8e6db628887":
 		service.StoreFormPlcData(box, data) //压型x
 	case "52980204e2dc4ce9907196441c6f9a32":
-		service.StoreRoastDenitrificationData(box, data) //焙烧脱硝
+		service.StoreRoastDenitrificationData(box, data) //焙烧脱硝x
 	case "97509d2212bf4b1cb5bc3ea8dd8649d7":
-		service.FourSeaStoreFormPlcData(box, data) //四海成型
+		service.FourSeaStoreFormPlcData(box, data) //四海成型x
 	default:
 		fmt.Println("没有这个设备")
 	}

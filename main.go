@@ -12,9 +12,10 @@ func init() {
 }
 
 func main() {
-	go timer.SuKonCloudTimer()
+	timer.SuKonCloudTimer()
 	engine := router.GetEngine()
 	if err := engine.Run(":8091"); err != nil {
 		panic(err)
 	}
+
 }

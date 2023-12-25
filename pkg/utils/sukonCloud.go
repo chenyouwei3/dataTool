@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"io"
 	"log"
 	"math"
@@ -34,7 +33,12 @@ func SukonToken() {
 	if err != nil {
 		log.Println("请求错误:", err.Error())
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("关闭获取速控云token失败:", err)
+		}
+	}()
 	body0, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err.Error())
@@ -60,12 +64,11 @@ func SukonToken() {
 	return
 }
 
-func SKCloudHisData(box model.Box, data model.RealtimeData, coll *mongo.Collection, str string) {
+func GetSKCloudHisData(box model.Box, data model.RealtimeData, str string) model.Box { //数据标准格式化
 	//查找设备
 	var BoxDevice model.Device
 	if err := global.DeviceColl.FindOne(context.TODO(), bson.M{"code": box.BoxId}).Decode(&BoxDevice); err != nil {
 		log.Println(box.BoxId+"设备不存在", err)
-		return
 	}
 	box.DeviceTypeId = BoxDevice.DeviceTypeId
 	box.CreateTime = TimeFormat(time.Now())
@@ -92,8 +95,43 @@ func SKCloudHisData(box model.Box, data model.RealtimeData, coll *mongo.Collecti
 			}
 		}
 	}
-	_, err := coll.InsertOne(context.Background(), box) //历史表插入
-	if err != nil {
-		log.Println(box, "存储分钟历史数据失败:", err.Error())
-	}
+	fmt.Println("test111")
+	return box
 }
+
+//func SukouCloudHttpModel(url string, urlValues url.Values) { //判断网络请求返回的格式
+//	var data interface{}
+//	res, err := http.PostForm(url, urlValues)
+//	if err != nil {
+//		log.Println("请求错误:", err)
+//	}
+//	defer func(Body io.ReadCloser) {
+//		err := Body.Close()
+//		if err != nil {
+//			log.Println("速控云结构体判断请求失败:", err)
+//		}
+//	}(res.Body)
+//	body, err := io.ReadAll(res.Body)
+//	if err != nil {
+//		log.Println("响应错误:", err)
+//	}
+//	err = json.Unmarshal(body, &data)
+//	if err != nil {
+//		log.Println("解析错误:", err)
+//	}
+//	fmt.Println("45645", data)
+//	switch data.(type) {
+//	case model.BoxPlc:
+//		fmt.Println("model.BoxPlc")
+//		fmt.Println(data)
+//	case model.BoxVariant:
+//		fmt.Println("BoxVariant")
+//		fmt.Println(data)
+//	case model.RealtimeData:
+//		fmt.Println("RealtimeData")
+//	case model.SuKonProject:
+//		fmt.Println("SuKonProject")
+//	default:
+//		fmt.Println("测试失败gggggg")
+//	}
+//}

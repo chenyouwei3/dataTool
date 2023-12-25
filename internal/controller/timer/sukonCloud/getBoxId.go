@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"io"
 	"log"
 	"net/http"
@@ -25,7 +26,12 @@ func SuKonCloudProjects() { //获取项目
 	if err != nil {
 		log.Println("请求错误:", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("获取速控云项目失败:", err)
+		}
+	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
@@ -57,7 +63,12 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 	if err != nil {
 		log.Println("请求错误:", err)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Println("获取box错误:", err)
+		}
+	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
@@ -73,13 +84,12 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 	var mutex sync.Mutex
 	for _, box := range data.Data {
 		mutex.Lock()
-
 		switch box.Status {
 		case "0":
 			updateTime := utils.TimeFormat(time.Now())
 			update := bson.M{"$set": bson.M{"status": "离线", "updateTime": updateTime}}
 			err = global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
-			if err != nil {
+			if err != nil && err != mongo.ErrNoDocuments {
 				log.Println("0:", err)
 				mutex.Unlock()
 				continue
@@ -90,7 +100,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			updateTime := utils.TimeFormat(time.Now())
 			update := bson.M{"$set": bson.M{"status": "正常", "updateTime": updateTime}}
 			err = global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
-			if err != nil {
+			if err != nil && err != mongo.ErrNoDocuments {
 				log.Println("1:", err)
 				mutex.Unlock()
 				continue
@@ -104,7 +114,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 		default:
 			fmt.Println("没有设备")
 		}
-		//global.SendBoxTaskChan <- box.BoxId
 		mutex.Unlock()
 	}
+	wg.Wait()
 }

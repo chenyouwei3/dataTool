@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 	"time"
 )
@@ -16,6 +17,20 @@ func GetPage(currPage, pageSize string) (int, int, error) {
 	}
 	skip := (curr - 1) * size
 	return skip, size, nil
+}
+
+func GetTime(startTime, endTime string) (filter bson.M) {
+	if startTime != "" && endTime != "" {
+		filter = bson.M{
+			"createTime": bson.M{
+				"$gte": startTime,
+				"$lte": endTime,
+			},
+		}
+		return filter
+	}
+	filter = bson.M{}
+	return filter
 }
 
 func TimeFormat(t time.Time) string {

@@ -9,9 +9,9 @@ var (
 	ImmersionHisData *mongo.Collection //浸渍
 	//西跨吸料天车
 	WestCraneCarHisData *mongo.Collection
-	//隧道窑湿电
-	GraphitingHisData *mongo.Collection
 	//石墨化
+	GraphitingHisData *mongo.Collection
+	//隧道窑湿电
 	TunnelWetElectricHisDataColl *mongo.Collection
 	//焙烧湿电
 	RoastWetElectricHisDataColl *mongo.Collection

@@ -24,7 +24,7 @@ func MongodbInit() {
 		//速控云
 		global.ImmersionHisData = sukonCloud.Collection("ImmersionHisData")
 		global.WestCraneCarHisData = sukonCloud.Collection("WestCraneCarHisData")
-		global.GraphitingHisData = sukonCloud.Collection("test")
+		global.GraphitingHisData = sukonCloud.Collection("GraphitingHisData")
 		global.TunnelWetElectricHisDataColl = sukonCloud.Collection("TunnelWetElectricHisDataColl")
 		global.RoastWetElectricHisDataColl = sukonCloud.Collection("RoastWetElectricHisDataColl")
 		global.GraphitingWetElectricHisDataColl = sukonCloud.Collection("GraphitingWetElectricHisDataColl")

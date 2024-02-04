@@ -14,7 +14,6 @@ import (
 
 // 获取plc
 func BoxPlc(boxId string) {
-	//boxId := <-global.SendBoxTaskChan
 	URL := "http://sukon-cloud.com/api/v1/base/boxPlcs"
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
@@ -23,20 +22,22 @@ func BoxPlc(boxId string) {
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
+		return
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
+		if err := res.Body.Close(); err != nil {
 			log.Println("获取boxplc关闭连接处理错误1:", err)
 		}
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
+		return
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Println("解析错误:", err)
+		return
 	}
 	urlValues.Del("boxId")
 	if data.Data == nil {
@@ -60,20 +61,22 @@ func FindVariant(boxId, plcId string) {
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
+		return
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
+		if err = res.Body.Close(); err != nil {
 			log.Println("获取变量失败:", err)
 		}
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
+		return
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Println("解析错误:", err)
+		return
 	}
 	urlValues.Del("boxId")
 	urlValues.Del("plcId")
@@ -118,7 +121,7 @@ func FindVariant(boxId, plcId string) {
 
 // 获取实时数据
 func GetBoxRealTimeData(variantIds string, box model.Box) {
-	fmt.Println("boxid", box.BoxId)
+	fmt.Println("boxid", box.BoxId, "daa")
 	URL := "http://sukon-cloud.com/api/v1/data/realtimeDatas"
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
@@ -127,20 +130,22 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
+		return
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
+		if err := res.Body.Close(); err != nil {
 			log.Println("获取实时数据失败:", err)
 		}
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
+		return
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Println("解析错误:", err)
+		return
 	}
 	urlValues.Del("variantIds")
 	switch box.BoxId {

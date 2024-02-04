@@ -2,20 +2,18 @@ package main
 
 import (
 	"dataTool/initialize"
-	"dataTool/internal/controller/timer"
+	"dataTool/internal/controller/ticker"
 	"dataTool/internal/router"
 )
 
 func init() {
-	initialize.InitDataBase()
-	initialize.InitChan()
+	initialize.InitConfig()
 }
 
 func main() {
-	timer.SuKonCloudTimer()
+	go ticker.CornTicker()
 	engine := router.GetEngine()
-	if err := engine.Run(":8091"); err != nil {
+	if err := engine.Run(":8093"); err != nil {
 		panic(err)
 	}
-
 }

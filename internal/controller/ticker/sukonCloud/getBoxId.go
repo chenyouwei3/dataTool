@@ -25,20 +25,22 @@ func SuKonCloudProjects() { //获取项目
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
+		return
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
+		if err := res.Body.Close(); err != nil {
 			log.Println("获取速控云项目失败:", err)
 		}
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
+		return
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Println("解析错误:", err)
+		return
 	}
 	if data.Data == nil && data.Msg == "token已过期" {
 		fmt.Println("project数据为空,获取失败---", data)
@@ -62,20 +64,22 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 	res, err := http.PostForm(URL, urlValues)
 	if err != nil {
 		log.Println("请求错误:", err)
+		return
 	}
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
+		if err := res.Body.Close(); err != nil {
 			log.Println("获取box错误:", err)
 		}
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Println("响应错误:", err)
+		return
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Println("解析错误:", err)
+		return
 	}
 	if data.Success == false {
 		log.Println("获取box异常", data)
@@ -83,6 +87,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 	for _, box := range data.Data {
+		fmt.Println(box.Name)
 		mutex.Lock()
 		switch box.Status {
 		case "0":
@@ -95,6 +100,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 				continue
 			}
 			fmt.Println(box.Name + "设备离线")
+			mutex.Unlock()
 			continue
 		case "1":
 			updateTime := utils.TimeFormat(time.Now())
@@ -110,11 +116,13 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 				defer wg.Done()
 				BoxPlc(boxId)
 			}(box.BoxId)
+			//BoxPlc(box.BoxId)
 			fmt.Println(box.Name + "设备在线")
+			mutex.Unlock()
 		default:
 			fmt.Println("没有设备")
 		}
-		mutex.Unlock()
 	}
 	wg.Wait()
+	fmt.Println("等待组是否结束")
 }

@@ -14,10 +14,15 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func IsProd() bool {
+	return runtime.GOOS != "linux"
+}
 
 func SukonToken() {
 	timeUnix := time.Now().UnixNano() / 1e6
@@ -95,43 +100,5 @@ func GetSKCloudHisData(box model.Box, data model.RealtimeData, str string) model
 			}
 		}
 	}
-	fmt.Println("test111")
 	return box
 }
-
-//func SukouCloudHttpModel(url string, urlValues url.Values) { //判断网络请求返回的格式
-//	var data interface{}
-//	res, err := http.PostForm(url, urlValues)
-//	if err != nil {
-//		log.Println("请求错误:", err)
-//	}
-//	defer func(Body io.ReadCloser) {
-//		err := Body.Close()
-//		if err != nil {
-//			log.Println("速控云结构体判断请求失败:", err)
-//		}
-//	}(res.Body)
-//	body, err := io.ReadAll(res.Body)
-//	if err != nil {
-//		log.Println("响应错误:", err)
-//	}
-//	err = json.Unmarshal(body, &data)
-//	if err != nil {
-//		log.Println("解析错误:", err)
-//	}
-//	fmt.Println("45645", data)
-//	switch data.(type) {
-//	case model.BoxPlc:
-//		fmt.Println("model.BoxPlc")
-//		fmt.Println(data)
-//	case model.BoxVariant:
-//		fmt.Println("BoxVariant")
-//		fmt.Println(data)
-//	case model.RealtimeData:
-//		fmt.Println("RealtimeData")
-//	case model.SuKonProject:
-//		fmt.Println("SuKonProject")
-//	default:
-//		fmt.Println("测试失败gggggg")
-//	}
-//}

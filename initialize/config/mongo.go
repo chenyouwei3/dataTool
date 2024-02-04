@@ -1,25 +1,24 @@
-package database
+package config
 
 import (
 	"context"
 	"dataTool/initialize/global"
-	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 )
 
-func MongodbInit() {
-	if global.MongodbClient403 == nil {
-		global.MongodbClient403 = getMongodbClient(global.MongodbAddress)
+func MongodbInit(config MongodbConfig) {
+	if global.MongodbClient == nil {
+		global.MongodbClient = getMongoClient(config.Address)
 	}
-	smartGraphiteHBClone := global.MongodbClient403.Database("smartGraphiteHB-Clone")
+	smartGraphiteHBClone := global.MongodbClient.Database("smartGraphiteHB-Clone")
 	{
 		global.DeviceColl = smartGraphiteHBClone.Collection("device")
 		//速控云
 
 	}
-	sukonCloud := global.MongodbClient403.Database("sukouCloud")
+	sukonCloud := global.MongodbClient.Database("sukouCloud")
 	{
 		//速控云
 		global.ImmersionHisData = sukonCloud.Collection("ImmersionHisData")
@@ -38,16 +37,14 @@ func MongodbInit() {
 	}
 }
 
-func getMongodbClient(uri string) *mongo.Client {
-	clientOptions := options.Client().ApplyURI(uri)                    // 创建一个新的客户端选项实例
-	mongodbClient, err := mongo.Connect(context.TODO(), clientOptions) //使用提供的客户端选项连接到 mongodb
+func getMongoClient(uri string) *mongo.Client {
+	clientOptions := options.Client().ApplyURI(uri)
+	MongoClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatalln("客户端连接mongodb失败:", err)
+		log.Println(err)
 	}
-	err = mongodbClient.Ping(context.TODO(), nil) // 验证与mongodb的连接是否成功
-	if err != nil {
-		log.Fatalln("客户端连接mongodb失败:", err)
+	if err = MongoClient.Ping(context.TODO(), nil); err != nil {
+		log.Println(err)
 	}
-	fmt.Println("mongodb连接成功")
-	return mongodbClient
+	return MongoClient
 }

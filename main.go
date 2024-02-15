@@ -2,7 +2,6 @@ package main
 
 import (
 	"dataTool/initialize"
-	"dataTool/internal/controller/ticker"
 	"dataTool/internal/router"
 )
 
@@ -11,9 +10,11 @@ func init() {
 }
 
 func main() {
-	go ticker.CornTicker()
+	////go ticker.CornTicker()
+	//global.MysqlClient.AutoMigrate(model.User{}, model.Role{})
 	engine := router.GetEngine()
-	if err := engine.Run(":8093"); err != nil {
+	if err := engine.Run(":8095"); err != nil {
 		panic(err)
 	}
+
 }

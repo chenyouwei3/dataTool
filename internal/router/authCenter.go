@@ -6,6 +6,11 @@ import (
 )
 
 func AuthCenterRouter(engine *gin.Engine) {
+	user := engine.Group("/user")
+	{
+		user.POST("/create", controller.CreateUser)     //增user*
+		user.DELETE("/deleted", controller.DeletedUser) //删除user*
+	}
 	api := engine.Group("/api")
 	{
 		api.POST("/create", controller.CreateApi)     //增api@

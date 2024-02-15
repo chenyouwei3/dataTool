@@ -14,6 +14,7 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"runtime"
 	"strconv"
 	"strings"
@@ -101,4 +102,29 @@ func GetSKCloudHisData(box model.Box, data model.RealtimeData, str string) model
 		}
 	}
 	return box
+}
+
+func Test[T model.SuKonProject | model.ProjectBox | model.BoxPlc | model.BoxVariant | model.RealtimeData](data T, url string, urlValues url.Values) (T, error) {
+	var t T
+	res, err := http.PostForm(url, urlValues)
+	if err != nil {
+		log.Println("请求错误:", err)
+		return t, err
+	}
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			log.Println("获取box错误:", err)
+		}
+	}()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("响应错误:", err)
+		return t, err
+	}
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Println("解析错误:", err)
+		return t, err
+	}
+	return data, nil
 }

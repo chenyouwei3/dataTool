@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 	"time"
@@ -37,7 +38,10 @@ func TimeFormat(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
-func GetNowTime() *time.Time {
-	time := time.Now()
-	return &time
+func GetNowTime() time.Time {
+	parsedTime, err := time.Parse("2006-01-02 15:04:05", TimeFormat(time.Now()))
+	if err != nil {
+		fmt.Println("解析时间字符串失败：", err)
+	}
+	return parsedTime
 }

@@ -9,6 +9,24 @@ import (
 	"strconv"
 )
 
+func CreateUser(c *gin.Context) {
+	var user model.User
+	if err := c.Bind(&user); err != nil {
+		c.JSON(e.ParameterStructError, e.GetMsg(e.ParameterStructError))
+		return
+	}
+	c.JSON(http.StatusOK, service.CreateUser(user))
+}
+
+func DeletedUser(c *gin.Context) {
+	id := c.Query("id")
+	if id == " " {
+		c.JSON(e.ParameterError, e.GetMsg(e.ParameterError))
+		return
+	}
+	c.JSON(http.StatusOK, service.DeletedUser(id))
+}
+
 func CreateApi(c *gin.Context) {
 	var api model.Api
 	if err := c.Bind(&api); err != nil {

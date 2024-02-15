@@ -4,11 +4,8 @@ import (
 	"dataTool/initialize/global"
 	"dataTool/internal/model"
 	"dataTool/internal/service"
-	"encoding/json"
+	"dataTool/pkg/utils"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 	"net/url"
 )
 
@@ -19,26 +16,7 @@ func BoxPlc(boxId string) {
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("boxId", boxId)
 	var data model.BoxPlc
-	res, err := http.PostForm(URL, urlValues)
-	if err != nil {
-		log.Println("请求错误:", err)
-		return
-	}
-	defer func() {
-		if err := res.Body.Close(); err != nil {
-			log.Println("获取boxplc关闭连接处理错误1:", err)
-		}
-	}()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Println("响应错误:", err)
-		return
-	}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		log.Println("解析错误:", err)
-		return
-	}
+	data, _ = utils.Test(data, URL, urlValues)
 	urlValues.Del("boxId")
 	if data.Data == nil {
 		fmt.Println("plcId为空", data)
@@ -55,29 +33,10 @@ func FindVariant(boxId, plcId string) {
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("boxId", boxId)
+	urlValues.Add("plcId", plcId)
 	//获取每个sid下变量
 	var data model.BoxVariant
-	urlValues.Add("plcId", plcId)
-	res, err := http.PostForm(URL, urlValues)
-	if err != nil {
-		log.Println("请求错误:", err)
-		return
-	}
-	defer func() {
-		if err = res.Body.Close(); err != nil {
-			log.Println("获取变量失败:", err)
-		}
-	}()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Println("响应错误:", err)
-		return
-	}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		log.Println("解析错误:", err)
-		return
-	}
+	data, _ = utils.Test(data, URL, urlValues)
 	urlValues.Del("boxId")
 	urlValues.Del("plcId")
 	if data.Success == false {
@@ -121,32 +80,12 @@ func FindVariant(boxId, plcId string) {
 
 // 获取实时数据
 func GetBoxRealTimeData(variantIds string, box model.Box) {
-	fmt.Println("boxid", box.BoxId, "daa")
 	URL := "http://sukon-cloud.com/api/v1/data/realtimeDatas"
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("variantIds", variantIds)
 	var data model.RealtimeData
-	res, err := http.PostForm(URL, urlValues)
-	if err != nil {
-		log.Println("请求错误:", err)
-		return
-	}
-	defer func() {
-		if err := res.Body.Close(); err != nil {
-			log.Println("获取实时数据失败:", err)
-		}
-	}()
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Println("响应错误:", err)
-		return
-	}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		log.Println("解析错误:", err)
-		return
-	}
+	data, _ = utils.Test(data, URL, urlValues)
 	urlValues.Del("variantIds")
 	switch box.BoxId {
 	case "2da580adb26b4a12accd4aec80e04656":

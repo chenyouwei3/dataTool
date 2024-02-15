@@ -4,9 +4,66 @@ import (
 	"dataTool/initialize/global"
 	"dataTool/internal/model"
 	"dataTool/pkg/utils"
+	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"strconv"
 )
+
+func CreateUser(user model.User) utils.Response {
+	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
+		//查询账号重复
+		if err := tx.Where("account = ?", user.Account).First(&model.User{}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("查询账号错误:%w", err)
+		}
+		// 查询角色是否存在
+		var roleDB []model.Role
+		if err := global.RoleTable.Where("id IN ?", extractRoleIDs(user.Role)).Find(&roleDB).Error; err != nil {
+			return fmt.Errorf("查询角色错误:%w", err)
+		}
+		if len(roleDB) != len(user.Role) { // 检查查询到的角色数量是否和传入的角色数量相等
+			return fmt.Errorf("角色数量不相等")
+		}
+		//插入事务
+		if err := global.RoleTable.Transaction(func(tx1 *gorm.DB) error {
+			user.Id = global.ApiSnowFlake.Generate().Int64()
+			if err := tx.Create(&user).Error; err != nil {
+				return fmt.Errorf("创建角色失败:%w", err)
+			}
+			return nil
+		}); err != nil {
+			return fmt.Errorf("创建角色事务失败:%w", err.Error())
+		}
+		return nil
+	}); err != nil {
+		return utils.ErrorMess("事务失败", err.Error())
+	}
+	return utils.SuccessMess("插入成功", "1")
+}
+
+func extractRoleIDs(roles []model.Role) []int64 { // 提取角色ID列表(辅助函数)
+	ids := make([]int64, len(roles))
+	for i, role := range roles {
+		ids[i] = role.Id
+	}
+	return ids
+}
+
+func DeletedUser(idString string) utils.Response {
+	id, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		return utils.ErrorMess("失败", err.Error())
+	}
+	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&model.User{}, id).Error; err != nil {
+			return fmt.Errorf("删除角色失败:%w", err)
+		}
+		return nil
+	}); err != nil {
+		return utils.ErrorMess("删除事务失败", err.Error())
+	}
+	return utils.SuccessMess("删除成功", id)
+}
 
 func CreateApi(api model.Api) utils.Response {
 	tx := global.ApiTable.Begin()
@@ -20,7 +77,7 @@ func CreateApi(api model.Api) utils.Response {
 		return utils.ErrorMess("查重错误", res.Error.Error())
 	}
 	if res.Error == gorm.ErrRecordNotFound {
-		api.CreateTime = utils.GetNowTime()
+		//api.CreateTime = utils.GetNowTime()
 		api.Id = global.ApiSnowFlake.Generate().Int64()
 		res = tx.Create(&api)
 		if res.Error != nil {
@@ -63,7 +120,7 @@ func UpdateApi(api model.Api) utils.Response {
 	Temp := apiDB.CreateTime
 	apiDB = api
 	apiDB.CreateTime = Temp
-	apiDB.UpdateTime = utils.GetNowTime()
+	//apiDB.UpdateTime = utils.GetNowTime()
 	res = tx.Where("id = ?", api.Id).Save(&apiDB)
 	if res.Error != nil {
 		tx.Rollback()
@@ -108,7 +165,7 @@ func CreateRole(role model.Role) utils.Response {
 		return utils.ErrorMess("查重错误", res.Error.Error())
 	}
 	if res.Error == gorm.ErrRecordNotFound {
-		role.CreateTime = utils.GetNowTime()
+		//role.CreateTime = utils.GetNowTime()
 		role.Id = global.ApiSnowFlake.Generate().Int64()
 		res = tx.Create(&role)
 		if res.Error != nil {

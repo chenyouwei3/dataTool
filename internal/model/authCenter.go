@@ -19,6 +19,11 @@ type Role struct {
 	User   []User `gorm:"many2many:user_roles;"`
 }
 
+type UserRole struct {
+	UserID int64 `json:"user_id" gorm:"column:user_id;type:bigint;not null"`
+	RoleID int64 `json:"role_id" gorm:"column:role_id;type:bigint;not null"`
+}
+
 type Api struct {
 	Id         int64      `json:"id" gorm:"column:id;type:bigint(20);primaryKey;not null"`
 	Name       string     ` json:"name" gorm:"column:name;type:varchar(20);not null"`
@@ -34,29 +39,3 @@ type RoleAPI struct {
 	RoleID int64 `gorm:"column:role_id;index;constraint:OnDelete:CASCADE" json:"role_id"`
 	APIID  int64 `gorm:"column:api_id;index;constraint:OnDelete:CASCADE" json:"api_id"`
 }
-
-//
-//func CreateApi(api model.Api) utils.Response {
-//	tx := global.ApiTable.Begin()
-//	if api.Name == " " || api.Url == " " || len(api.Url) >= 20 || len(api.Name) >= 10 || (api.Method != "GET" && api.Method != "POST" && api.Method != "PUT" && api.Method != "DELETE") {
-//		return utils.ErrorMess("参数错误", nil)
-//	}
-//	var apiDB model.Api
-//	res := tx.Where("name = ?", api.Name).Or("url = ? and method = ?", api.Url, api.Method).First(&apiDB)
-//	if res.Error != nil && res.Error != gorm.ErrRecordNotFound {
-//		tx.Rollback()
-//		return utils.ErrorMess("查重错误", res.Error.Error())
-//	}
-//	if res.Error == gorm.ErrRecordNotFound {
-//		//api.CreateTime = utils.GetNowTime()
-//		api.Id = global.ApiSnowFlake.Generate().Int64()
-//		res = tx.Create(&api)
-//		if res.Error != nil {
-//			tx.Rollback()
-//			return utils.ErrorMess("失败", res.Error.Error())
-//		}
-//		tx.Commit()
-//		return utils.SuccessMess("成功", res.RowsAffected)
-//	}
-//	return utils.ErrorMess("创建失败", "此api已存在")
-//}

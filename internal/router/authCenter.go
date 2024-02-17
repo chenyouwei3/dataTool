@@ -10,6 +10,8 @@ func AuthCenterRouter(engine *gin.Engine) {
 	{
 		user.POST("/create", controller.CreateUser)     //增user*
 		user.DELETE("/deleted", controller.DeletedUser) //删除user*
+		user.PUT("/update", controller.UpdatedUser)     //修改*
+		user.GET("/get", controller.GetUser)            //查找*
 	}
 	api := engine.Group("/api")
 	{

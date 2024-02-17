@@ -13,7 +13,9 @@ import (
 func CreateUser(user model.User) utils.Response {
 	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
 		//查询账号重复
-		if err := tx.Where("account = ?", user.Account).First(&model.User{}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		var userDB model.User
+		if err := tx.Where("account = ?", user.Account).First(&userDB).Error; (err != nil && !errors.Is(err, gorm.ErrRecordNotFound)) || userDB.Account == user.Account {
+			fmt.Println(err)
 			return fmt.Errorf("查询账号错误:%w", err)
 		}
 		// 查询角色是否存在
@@ -32,11 +34,11 @@ func CreateUser(user model.User) utils.Response {
 			}
 			return nil
 		}); err != nil {
-			return fmt.Errorf("创建角色事务失败:%w", err.Error())
+			return fmt.Errorf("创建角色事务失败:%w", err)
 		}
 		return nil
 	}); err != nil {
-		return utils.ErrorMess("事务失败", err.Error())
+		return utils.ErrorMess("事务失败", err)
 	}
 	return utils.SuccessMess("插入成功", "1")
 }
@@ -52,17 +54,68 @@ func extractRoleIDs(roles []model.Role) []int64 { // 提取角色ID列表(辅助
 func DeletedUser(idString string) utils.Response {
 	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		return utils.ErrorMess("失败", err.Error())
+		return utils.ErrorMess("失败", err)
 	}
 	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
+		tx0 := global.UserRoleTable.Begin()
+		if err := tx0.Model(&model.User{Id: id}).Association("Role").Clear(); err != nil {
+			tx0.Rollback()
+			return fmt.Errorf("清除关联失败:%w", err)
+		}
+		tx0.Commit()
+		// 删除用户记录
 		if err := tx.Delete(&model.User{}, id).Error; err != nil {
-			return fmt.Errorf("删除角色失败:%w", err)
+			return err
 		}
 		return nil
 	}); err != nil {
-		return utils.ErrorMess("删除事务失败", err.Error())
+		return utils.ErrorMess("删除事务失败", err)
 	}
 	return utils.SuccessMess("删除成功", id)
+}
+
+func UpdatedUser(user model.User) utils.Response {
+	if len(user.Name) > 20 {
+		return utils.ErrorMess("字段过长", "重新更改")
+	}
+	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
+		var userDB model.User
+		if err := tx.Where("id = ?", user.Id).First(&userDB).Error; err != nil || errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("查询失败%w", err)
+		}
+		userDB.Name = user.Name
+		if err := tx.Save(&userDB).Error; err != nil {
+			return fmt.Errorf("更新角色失败:%w", err)
+		}
+		return nil
+	}); err != nil {
+		return utils.ErrorMess("事务失败", err)
+	}
+	return utils.SuccessMess("修改用户成功", user.Id)
+}
+
+func GetUser(name, currPage, pageSize, startTime, endTime string) utils.Response {
+	skip, limit, err := utils.GetPage(currPage, pageSize)
+	if err != nil {
+		return utils.ErrorMess("数据转化失败", err)
+	}
+	tx := global.UserTable
+	if startTime != "" && endTime != "" {
+		tx = tx.Where("createTime >= ? and createTime <=?", startTime, endTime)
+	}
+	var count int64
+	var userDB []model.User
+	res := tx.Preload("Role").Order("id desc").Where("name like ?", "%"+name+"%").Limit(limit).Offset(skip).Find(&userDB).Count(&count)
+	if res.Error != nil {
+		return utils.ErrorMess("失败", res.Error)
+	}
+	return utils.SuccessMess("成功", struct {
+		Count int64        `json:"count" bson:"count"`
+		Data  []model.User `json:"data" bson:"data"`
+	}{
+		Count: count,
+		Data:  userDB,
+	})
 }
 
 func CreateApi(api model.Api) utils.Response {

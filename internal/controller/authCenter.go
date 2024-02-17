@@ -27,6 +27,24 @@ func DeletedUser(c *gin.Context) {
 	c.JSON(http.StatusOK, service.DeletedUser(id))
 }
 
+func UpdatedUser(c *gin.Context) {
+	var user model.User
+	if err := c.Bind(&user); err != nil {
+		c.JSON(e.ParameterStructError, e.GetMsg(e.ParameterStructError))
+		return
+	}
+	c.JSON(http.StatusOK, service.UpdatedUser(user))
+}
+
+func GetUser(c *gin.Context) {
+	name := c.Query("name")
+	currPage := c.DefaultQuery("currPage", "1")
+	pageSize := c.DefaultQuery("pageSize", "10")
+	startTime := c.Query("startTime")
+	endTime := c.Query("endTime")
+	c.JSON(http.StatusOK, service.GetUser(name, currPage, pageSize, startTime, endTime))
+}
+
 func CreateApi(c *gin.Context) {
 	var api model.Api
 	if err := c.Bind(&api); err != nil {

@@ -24,6 +24,7 @@ func MysqlInit(config MysqlConfig) {
 	{
 		global.UserTable = global.MysqlClient.Table("users")
 		global.RoleTable = global.MysqlClient.Table("roles")
+		global.UserRoleTable = global.MysqlClient.Table("user_roles")
 		global.ApiTable = global.MysqlClient.Table("api")
 		global.LogTable = global.MysqlClient.Table("log")
 	}

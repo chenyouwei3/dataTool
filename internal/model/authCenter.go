@@ -1,9 +1,5 @@
 package model
 
-import (
-	"time"
-)
-
 type User struct {
 	Id       int64  `db:"id" json:"id" gorm:"column:id;type:bigint;primarykey;not null"`
 	Name     string `db:"name" json:"name" gorm:"column:name;type:varchar(20);not null"`
@@ -13,29 +9,19 @@ type User struct {
 }
 
 type Role struct {
-	Id     int64  `json:"id" gorm:"column:id;type:bigint;primarykey;not null"`
-	Name   string `json:"name" gorm:"column:name;type:varchar(20);not null"`
-	UserId int64
-	User   []User `gorm:"many2many:user_roles;"`
-}
-
-type UserRole struct {
-	UserID int64 `json:"user_id" gorm:"column:user_id;type:bigint;not null"`
-	RoleID int64 `json:"role_id" gorm:"column:role_id;type:bigint;not null"`
+	Id   int64  `json:"id" gorm:"column:id;type:bigint;primarykey;not null"`
+	Name string `json:"name" gorm:"column:name;type:varchar(20);not null"`
+	User []User `gorm:"many2many:user_roles;"`
+	Api  []Api  `gorm:"many2many:role_apis;"`
 }
 
 type Api struct {
-	Id         int64      `json:"id" gorm:"column:id;type:bigint(20);primaryKey;not null"`
-	Name       string     ` json:"name" gorm:"column:name;type:varchar(20);not null"`
-	Url        string     ` json:"url" gorm:"column:url;type:varchar(20);not null"`
-	Method     string     ` json:"method" gorm:"column:method;type:varchar(10);not null"`
-	Desc       string     ` json:"desc" gorm:"column:desc;type:varchar(144)"`
-	CreateTime *time.Time ` json:"createTime" gorm:"column:createTime;type:datetime;not null"`
-	UpdateTime *time.Time `json:"updateTime" gorm:"column:updateTime;type:datetime"`
-	RoleAPIs   []RoleAPI  ` json:"roleAPIs" gorm:"many2many:role_apis;"`
-}
-
-type RoleAPI struct {
-	RoleID int64 `gorm:"column:role_id;index;constraint:OnDelete:CASCADE" json:"role_id"`
-	APIID  int64 `gorm:"column:api_id;index;constraint:OnDelete:CASCADE" json:"api_id"`
+	Id     int64  `json:"id" gorm:"column:id;type:bigint(20);primaryKey;not null"`
+	Name   string ` json:"name" gorm:"column:name;type:varchar(20);not null"`
+	Url    string ` json:"url" gorm:"column:url;type:varchar(20);not null"`
+	Method string ` json:"method" gorm:"column:method;type:varchar(10);not null"`
+	Desc   string ` json:"desc" gorm:"column:desc;type:varchar(144)"`
+	//CreateTime *time.Time ` json:"createTime" gorm:"column:createTime;type:datetime;not null"`
+	//UpdateTime *time.Time `json:"updateTime" gorm:"column:updateTime;type:datetime"`
+	Role []Role `gorm:"many2many:role_apis;"`
 }

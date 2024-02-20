@@ -17,7 +17,7 @@ func AuthCenterRouter(engine *gin.Engine) {
 	{
 		role.POST("/create", controller.CreateRole)     //增role*
 		role.DELETE("/deleted", controller.DeletedRole) //删role*
-		role.PUT("/update", controller.UpdatedRole)     //改role*
+		role.PUT("/update", controller.UpdatedRole)     //改role******************
 		role.GET("/get", controller.GetRole)            //查role*
 	}
 	api := engine.Group("/api")

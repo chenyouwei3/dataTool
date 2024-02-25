@@ -5,7 +5,7 @@ import (
 	"dataTool/internal/model"
 	"dataTool/internal/service"
 	"dataTool/pkg/utils"
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/url"
 )
 
@@ -16,10 +16,13 @@ func BoxPlc(boxId string) {
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("boxId", boxId)
 	var data model.BoxPlc
-	data, _ = utils.Test(data, URL, urlValues)
+	data, err := utils.SukouCloudHTTP(data, URL, urlValues)
+	if err != nil {
+		logrus.Error("http请求失败:", err)
+	}
 	urlValues.Del("boxId")
 	if data.Data == nil {
-		fmt.Println("plcId为空", data)
+		logrus.Error("plcId为空", data)
 		return
 	}
 	for _, a := range data.Data {
@@ -36,11 +39,14 @@ func FindVariant(boxId, plcId string) {
 	urlValues.Add("plcId", plcId)
 	//获取每个sid下变量
 	var data model.BoxVariant
-	data, _ = utils.Test(data, URL, urlValues)
+	data, err := utils.SukouCloudHTTP(data, URL, urlValues)
+	if err != nil {
+		logrus.Error("http请求失败:", err)
+	}
 	urlValues.Del("boxId")
 	urlValues.Del("plcId")
 	if data.Success == false {
-		fmt.Println("获取变量失败")
+		logrus.Error("获取变量失败")
 		return
 	}
 	//得到用于获取实时数据的变量字符串
@@ -85,7 +91,10 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("variantIds", variantIds)
 	var data model.RealtimeData
-	data, _ = utils.Test(data, URL, urlValues)
+	data, err := utils.SukouCloudHTTP(data, URL, urlValues)
+	if err != nil {
+		logrus.Error("http请求失败:", err)
+	}
 	urlValues.Del("variantIds")
 	switch box.BoxId {
 	case "2da580adb26b4a12accd4aec80e04656":
@@ -115,6 +124,6 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	case "97509d2212bf4b1cb5bc3ea8dd8649d7":
 		service.FourSeaStoreFormPlcData(box, data) //四海成型x
 	default:
-		fmt.Println("没有这个设备")
+		logrus.Println("没有这个设备")
 	}
 }

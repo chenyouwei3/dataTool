@@ -6,9 +6,9 @@ import (
 	"dataTool/internal/model"
 	"dataTool/pkg/utils"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"net/url"
 	"sync"
 	"time"
@@ -19,9 +19,12 @@ func SuKonCloudProjects() { //获取项目
 	urlValues := url.Values{}
 	urlValues.Add("token", global.SukonCloudToken)
 	var data model.SuKonProject
-	data, _ = utils.Test(data, URL, urlValues)
+	data, err := utils.SukouCloudHTTP(data, URL, urlValues)
+	if err != nil {
+		logrus.Error("http请求失败:", err)
+	}
 	if data.Data == nil && data.Msg == "token已过期" {
-		fmt.Println("project数据为空,获取失败---", data)
+		logrus.Error("project数据为空,获取失败---", data)
 		utils.SukonToken()
 		return
 	}
@@ -39,9 +42,12 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 	urlValues.Add("token", global.SukonCloudToken)
 	urlValues.Add("projectId", projectId)
 	var data model.ProjectBox
-	data, _ = utils.Test(data, URL, urlValues)
+	data, err := utils.SukouCloudHTTP(data, URL, urlValues)
+	if err != nil {
+		logrus.Error("http请求失败:", err)
+	}
 	if data.Success == false {
-		log.Println("获取box异常", data)
+		logrus.Error("获取box异常", data)
 	}
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -52,7 +58,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			update := bson.M{"$set": bson.M{"status": "离线", "updateTime": utils.TimeFormat(time.Now())}}
 			err := global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
 			if err != nil && err != mongo.ErrNoDocuments {
-				log.Println("0:", err)
+				logrus.Error("0:", err)
 				mutex.Unlock()
 				continue
 			}
@@ -63,7 +69,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			update := bson.M{"$set": bson.M{"status": "正常", "updateTime": utils.TimeFormat(time.Now())}}
 			err := global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
 			if err != nil && err != mongo.ErrNoDocuments {
-				log.Println("1:", err)
+				logrus.Error("1:", err)
 				mutex.Unlock()
 				continue
 			}
@@ -75,7 +81,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			fmt.Println(box.Name + "设备在线")
 			mutex.Unlock()
 		default:
-			fmt.Println("没有设备")
+			logrus.Println("没有设备")
 		}
 	}
 	wg.Wait()

@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"log"
 	"os"
 	"time"
 )
@@ -48,9 +48,9 @@ type JwtConfig struct {
 func Init(filename string) *config {
 	Config := &config{}
 	if yamlFile, err := os.ReadFile(filename); err != nil {
-		log.Fatalln("读取配置文件错误", err)
+		logrus.Fatalln("读取配置文件错误", err)
 	} else if err = yaml.Unmarshal(yamlFile, Config); err != nil {
-		log.Fatalln("读取配置文件错误", err)
+		logrus.Fatalln("读取配置文件错误", err)
 	}
 	return Config
 }

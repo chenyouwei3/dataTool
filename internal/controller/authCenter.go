@@ -115,3 +115,12 @@ func GetApi(c *gin.Context) {
 	endTime := c.Query("endTime")
 	c.JSON(http.StatusOK, service.GetApi(name, currPage, pageSize, startTime, endTime))
 }
+
+func Login(c *gin.Context) {
+	var user model.User
+	if err := c.Bind(&user); err != nil {
+		c.JSON(e.ParameterStructError, e.GetMsg(e.ParameterStructError))
+		return
+	}
+	c.JSON(http.StatusOK, service.LoginCookie(user, c))
+}

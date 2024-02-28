@@ -12,8 +12,9 @@ func CornTicker() {
 	if utils.IsProd() {
 		return
 	}
-	utils.SukonToken() //更新全局变量SuKon-Token
-	sukonCloud.SuKonCloudProjects()
+
+	//utils.SukonToken() //更新全局变量SuKon-Token
+	//sukonCloud.SuKonCloudProjects()
 	c := cron.New() //新建一个定时任务对象
 	//定时获取token
 	addCornFunc(c, global.Spec, utils.SukonToken, "获取SukouCloud-Token失败")

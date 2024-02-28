@@ -1,13 +1,18 @@
 package router
 
 import (
+	"dataTool/internal/controller"
 	"dataTool/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func GetEngine() *gin.Engine {
 	engine := gin.Default()
-	engine.Use(middleware.OperationLogMiddleware(), middleware.CorsMiddleware())
+	//限流/路由日志/跨域
+	engine.Use(middleware.Limiter(1, 1), middleware.OperationLogMiddleware(), middleware.CorsMiddleware()) //跨域
+	engine.POST("/login", controller.Login)
+	//权限/jwt/cookie/session
+	engine.Use(middleware.AuthCookieMiddleware())
 	AuthCenterRouter(engine)
 	return engine
 }

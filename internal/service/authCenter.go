@@ -6,8 +6,13 @@ import (
 	"dataTool/pkg/utils"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"math/rand"
+	"net/http"
 	"strconv"
+	"time"
 )
 
 func CreateUser(user model.User) utils.Response {
@@ -15,22 +20,29 @@ func CreateUser(user model.User) utils.Response {
 		//查询账号重复
 		var userDB model.User
 		if err := tx.Where("account = ?", user.Account).First(&userDB).Error; (err != nil && !errors.Is(err, gorm.ErrRecordNotFound)) || userDB.Account == user.Account {
-			return fmt.Errorf("查询账号错误:%w", err)
+			return fmt.Errorf("账号已存在:%w", err)
 		}
 		// 查询角色是否存在
 		var roleDB []model.Role
 		if err := global.RoleTable.Where("id = ?", user.RoleID).Find(&roleDB).Error; err != nil {
 			return fmt.Errorf("查询角色错误:%w", err)
 		}
+		rand.New(rand.NewSource(time.Now().Unix())) //根据时间戳生成种子
+		salt := strconv.FormatInt(rand.Int63(), 10) //生成盐
+		encryptedPass, err := bcrypt.GenerateFromPassword([]byte(user.Password+salt), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("密码加密失败:%w", err)
+		}
+		user.Password, user.Salt = string(encryptedPass), salt
 		//插入事务
 		if err := global.RoleTable.Transaction(func(tx1 *gorm.DB) error {
 			user.Id = global.ApiSnowFlake.Generate().Int64()
 			if err := tx.Create(&user).Error; err != nil {
-				return fmt.Errorf("创建角色失败:%w", err)
+				return fmt.Errorf("创建用户失败:%w", err)
 			}
 			return nil
 		}); err != nil {
-			return fmt.Errorf("创建角色事务失败:%w", err)
+			return fmt.Errorf("创建用户事务失败:%w", err)
 		}
 		return nil
 	}); err != nil {
@@ -286,7 +298,7 @@ func GetApi(name, currPage, pageSize, startTime, endTime string) utils.Response 
 	var count int64
 	var apiDB []model.Api
 	//Order("id desc")id降序排列
-	res := tx.Preload("Role").Where("name like ?", "%"+name+"%").Limit(limit).Offset(skip).Find(&apiDB).Count(&count)
+	res := tx.Order("id desc").Preload("Role").Where("id like ?", "%"+name+"%").Limit(limit).Offset(skip).Find(&apiDB).Count(&count)
 	if res.Error != nil {
 		return utils.ErrorMess("失败", res.Error.Error())
 	}
@@ -297,4 +309,49 @@ func GetApi(name, currPage, pageSize, startTime, endTime string) utils.Response 
 		Count: count,
 		Data:  apiDB,
 	})
+}
+
+func LoginCookie(user model.User, c *gin.Context) utils.Response {
+	var userDB model.User
+	if err := global.UserTable.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("account = ?", user.Account).First(&userDB).Error; err != nil {
+			return fmt.Errorf("账号已存在:%w", err)
+		}
+		//校验密码
+		if err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(user.Password+userDB.Salt)); err != nil {
+			return fmt.Errorf("密码错误%w", err)
+		}
+		//查询角色信息
+		var roleDB []model.Role
+		if err := global.RoleTable.Where("id = ?", user.RoleID).Find(&roleDB).Error; err != nil {
+			return fmt.Errorf("查询角色错误:%w", err)
+		}
+		return nil
+	}); err != nil {
+		return utils.ErrorMess("事务失败", err.Error())
+	}
+	//生成cookie
+	cookie := http.Cookie{
+		Name:   "cyw",                                        //名称
+		Value:  utils.CookieEncryption("cyw", user.Password), //值
+		Path:   "/",                                          //有效路径
+		Domain: c.ClientIP(),                                 //cookie的有效域名
+		//Expires:  time.Now().Add(time.Hour).UTC(), //过期时间
+		MaxAge:   3600,
+		HttpOnly: true, //js是否能够读取
+	}
+	//返回cookie
+	//c.Writer.Header().Add("Set-Cookie", cookie.String())
+	//设置在请求头上
+	http.SetCookie(c.Writer, &cookie)
+	res := map[string]interface{}{
+		"id":       userDB.Id,
+		"name":     userDB.Name,
+		"account":  userDB.Account,
+		"password": userDB.Password,
+		"salt":     userDB.Salt,
+		"role":     userDB.RoleID,
+		//"cookie":   cookie,
+	}
+	return utils.SuccessMess("登陆成功", res)
 }

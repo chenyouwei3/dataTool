@@ -2,8 +2,8 @@ package config
 
 import (
 	"dataTool/initialize/global"
-	"fmt"
 	"github.com/go-redis/redis"
+	"github.com/sirupsen/logrus"
 )
 
 // RedisInit 开启RedisPool
@@ -17,8 +17,7 @@ func RedisInit(config RedisConfig) {
 	})
 	ping, err := global.RedisClient.Ping().Result()
 	if err != nil {
-		fmt.Println("redis连接失败", ping, err)
-		return
+		logrus.Fatalln("redis连接失败", ping, err)
 	}
-	fmt.Println("redis连接成功", ping)
+	logrus.Println("redis连接成功", ping)
 }

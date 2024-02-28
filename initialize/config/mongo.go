@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"dataTool/initialize/global"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -41,10 +42,10 @@ func getMongoClient(uri string) *mongo.Client {
 	clientOptions := options.Client().ApplyURI(uri)
 	MongoClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Println(err)
+		logrus.Fatalln(err)
 	}
 	if err = MongoClient.Ping(context.TODO(), nil); err != nil {
-		log.Println(err)
+		log.Fatalln(err)
 	}
 	return MongoClient
 }

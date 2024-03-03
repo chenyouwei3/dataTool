@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/gorilla/securecookie"
 	"github.com/sirupsen/logrus"
 )
@@ -24,5 +25,6 @@ func CookieDecrypt(name, encodeValue string) string {
 	// 对value进行编码
 	var value string
 	secure.Decode(name, encodeValue, &value)
+	fmt.Println("value:", value)
 	return value
 }

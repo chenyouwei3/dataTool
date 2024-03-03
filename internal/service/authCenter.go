@@ -332,7 +332,7 @@ func LoginCookie(user model.User, c *gin.Context) utils.Response {
 	}
 	//生成cookie
 	cookie := http.Cookie{
-		Name:   "cyw",                                        //名称
+		Name:   user.Account,                                 //名称
 		Value:  utils.CookieEncryption("cyw", user.Password), //值
 		Path:   "/",                                          //有效路径
 		Domain: c.ClientIP(),                                 //cookie的有效域名

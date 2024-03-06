@@ -109,7 +109,7 @@ func SukouCloudHTTP[T model.SuKonProject | model.ProjectBox | model.BoxPlc | mod
 	var t T
 	res, err := http.PostForm(url, urlValues)
 	if err != nil {
-		return t, fmt.Errorf("请求错误:", err)
+		return t, fmt.Errorf("请求错误:%w", err)
 	}
 	defer func() {
 		if err := res.Body.Close(); err != nil {
@@ -118,11 +118,11 @@ func SukouCloudHTTP[T model.SuKonProject | model.ProjectBox | model.BoxPlc | mod
 	}()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return t, fmt.Errorf("响应错误:", err)
+		return t, fmt.Errorf("响应错误:%w", err)
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return t, fmt.Errorf("解析错误:", err)
+		return t, fmt.Errorf("解析错误:%w", err)
 	}
 	return data, nil
 }

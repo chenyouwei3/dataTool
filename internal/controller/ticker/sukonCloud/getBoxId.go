@@ -1,14 +1,12 @@
 package sukonCloud
 
 import (
-	"context"
 	"dataTool/initialize/global"
 	"dataTool/internal/model"
+	"dataTool/pkg/redis"
 	"dataTool/pkg/utils"
-	"fmt"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/url"
 	"sync"
 	"time"
@@ -50,36 +48,54 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 		logrus.Error("获取box异常", data)
 	}
 	var wg sync.WaitGroup
-	var mutex sync.Mutex
 	for i, box := range data.Data {
-		mutex.Lock()
 		switch box.Status {
 		case "0":
-			update := bson.M{"$set": bson.M{"status": "离线", "updateTime": utils.TimeFormat(time.Now())}}
-			err := global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
-			if err != nil && err != mongo.ErrNoDocuments {
-				logrus.Error("0:", err)
-				mutex.Unlock()
-				continue
+			var device model.Device
+			strRedis, err := redis.Redis{}.GetValueHash("rtts", box.BoxId)
+			if err != nil {
+				logrus.Error("解码失败:", err)
 			}
-			fmt.Println(box.Name + "设备离线")
-			mutex.Unlock()
+			err = json.Unmarshal([]byte(strRedis), &device) //解码
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
+			device.Status = "离线"
+			device.UpdateTime = utils.TimeFormat(time.Now())
+			lastDB, err := json.Marshal(device)
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
+			err = redis.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
 			continue
 		case "1":
-			update := bson.M{"$set": bson.M{"status": "正常", "updateTime": utils.TimeFormat(time.Now())}}
-			err := global.DeviceColl.FindOneAndUpdate(context.TODO(), bson.M{"code": box.BoxId}, update).Decode(bson.M{})
-			if err != nil && err != mongo.ErrNoDocuments {
-				logrus.Error("1:", err)
-				mutex.Unlock()
-				continue
+			var device model.Device
+			strRedis, err := redis.Redis{}.GetValueHash("rtts", box.BoxId)
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
+			err = json.Unmarshal([]byte(strRedis), &device) //解码
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
+			device.Status = "在线"
+			device.UpdateTime = utils.TimeFormat(time.Now())
+			lastDB, err := json.Marshal(device)
+			if err != nil {
+				logrus.Error("解码失败:", err)
+			}
+			err = redis.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
+			if err != nil {
+				logrus.Error("解码失败:", err)
 			}
 			wg.Add(1)
 			go func(boxId string, i int) {
 				defer wg.Done()
 				BoxPlc(boxId)
 			}(box.BoxId, i)
-			fmt.Println(box.Name + "设备在线")
-			mutex.Unlock()
 		default:
 			logrus.Println("没有设备")
 		}

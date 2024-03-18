@@ -97,10 +97,10 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	}
 	urlValues.Del("variantIds")
 	switch box.BoxId {
-	case "2da580adb26b4a12accd4aec80e04656":
-		service.StoreDippingData(box, data) //浸渍x
-	case "b46a0faf11cc4000a4c290eba5cc949a":
-		service.StoreWestAirCarData(box, data) //西跨吸料天车x
+	//case "2da580adb26b4a12accd4aec80e04656":
+	//	service.StoreDippingData(box, data) //浸渍x
+	//case "b46a0faf11cc4000a4c290eba5cc949a":
+	//	service.StoreWestAirCarData(box, data) //西跨吸料天车x
 	//case "be67c2b8216e49e8981a95663413f115":
 	//	service.StoreGraphitingData(box, data) //石墨化x
 	//case "5cba298477bc456ab1a2bd06e35cb0d8":
@@ -111,8 +111,8 @@ func GetBoxRealTimeData(variantIds string, box model.Box) {
 	//	service.StoreGraphiteWetElectricData(box, data) //石墨化湿电x
 	//case "f73fe0d8688046e088bb073849aa0c3f":
 	//	service.StoreEarthAirCarData(box, data) //东跨吸料天车x
-	//case "9f62bc0edbd542b2bec159ac8f023509":
-	//	service.StoreTunnelData(box, data) //隧道窑x
+	case "9f62bc0edbd542b2bec159ac8f023509":
+		service.StoreTunnelData(box, data) //隧道窑x
 	//case "9bd62f734af94dc0b0641817ac2807e9":
 	//	service.StoreCrucibleData(box, data) //坩埚x
 	//case "ef62aa2e44204b5d82463b72a86f9621":

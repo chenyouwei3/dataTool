@@ -8,4 +8,5 @@ func InitConfig() {
 	config.RedisInit(*config.Config.Redis)
 	config.SnowFlakeInit()
 	config.LogInit()
+	config.SocketServerStart()
 }

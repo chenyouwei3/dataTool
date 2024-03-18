@@ -5,6 +5,7 @@ import (
 	"dataTool/initialize/global"
 	"dataTool/internal/model"
 	"dataTool/pkg/utils"
+	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
@@ -68,11 +69,13 @@ func StoreEarthAirCarData(box model.Box, data model.RealtimeData) { // 存储东
 }
 
 func StoreTunnelData(box model.Box, data model.RealtimeData) { // 存储隧道窑分钟数据x
-	newBox := utils.GetSKCloudHisData(box, data, "9f62bc0edbd542b2bec159ac8f023509:")
-	_, err := global.TunnelHisDataColl.InsertOne(context.Background(), newBox)
-	if err != nil {
-		logrus.Error(box, "存储分钟历史数据失败:", err.Error())
-	}
+	fmt.Println(data, "+++++++++++++++", box.BoxId)
+
+	//newBox := utils.GetSKCloudHisData(box, data, "9f62bc0edbd542b2bec159ac8f023509:")
+	//_, err := global.TunnelHisDataColl.InsertOne(context.Background(), newBox)
+	//if err != nil {
+	//	logrus.Error(box, "存储分钟历史数据失败:", err.Error())
+	//}
 }
 
 func StoreCrucibleData(box model.Box, data model.RealtimeData) { // 存储坩埚分钟数据x

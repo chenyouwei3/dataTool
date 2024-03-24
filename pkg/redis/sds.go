@@ -2,6 +2,7 @@ package redis
 
 import (
 	"dataTool/initialize/global"
+	"fmt"
 	"time"
 )
 
@@ -22,4 +23,12 @@ func (r Redis) GetValue(key string) (string, error) {
 		return "", nil
 	}
 	return res, nil
+}
+
+func (r Redis) DeletedValue(key string) error {
+	err := global.RedisClient.Del(key).Err()
+	if err != nil {
+		return fmt.Errorf("redis(sds)删除失败:%w", err)
+	}
+	return nil
 }

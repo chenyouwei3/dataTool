@@ -28,11 +28,3 @@ func (r Redis) DeleteValueHash(key, field string) error {
 	}
 	return nil
 }
-
-//func (redis Redis) GetAndUpdateSukouCloud(key, field string, value *[]model.Device) ([]model.Device, error) {
-//	value, err := global.RedisClient.HGet(key, field).Result()
-//	if err != nil {
-//		return nil, fmt.Errorf("redis(sds)读取设备失败:%w", err)
-//	}
-//
-//}

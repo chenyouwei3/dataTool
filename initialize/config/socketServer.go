@@ -63,11 +63,11 @@ func socketServerWorker(taskQueue <-chan model.SocketServerTask, wg *sync.WaitGr
 // 创建连接(tcp)
 func processSocketServerTaskForTCP(task model.SocketServerTask, Func func(conn net.Conn)) {
 	listen, err := net.Listen("tcp", task.Address) //代表监听的地址端口
-	defer listen.Close()
 	if err != nil {
 		fmt.Println("listen failed, err:", err)
 		return
 	}
+	defer listen.Close()
 	fmt.Println("正在等待建立连接.....", listen.Addr())
 	for { //这个for循环的作用是可以多次建立连接
 		conn, err := listen.Accept() //请求建立连接，客户端未连接就会在这里一直等待
@@ -78,4 +78,37 @@ func processSocketServerTaskForTCP(task model.SocketServerTask, Func func(conn n
 		fmt.Println("连接建立成功.....")
 		go Func(conn)
 	}
+}
+
+// 创建连接(tcp)
+func processSocketServerTaskForUDP(task model.SocketServerTask, Func func(conn net.Conn)) {
+	listen, err := net.DialUDP("udp", nil, &net.UDPAddr{
+		IP:   net.IPv4(0, 0, 0, 0),
+		Port: 30000,
+	})
+	if err != nil {
+		fmt.Println("listen failed, err:", err)
+		return
+	}
+	defer listen.Close()
+	//fmt.Println("正在等待建立连接.....", listen.Addr())
+	//for { //这个for循环的作用是可以多次建立连接
+	//	conn, err := listen.Accept() //请求建立连接，客户端未连接就会在这里一直等待
+	//	if err != nil {
+	//		fmt.Println("accept failed, err:", err)
+	//		continue
+	//	}
+	//	fmt.Println("连接建立成功.....")
+	//	go Func(conn)
+	//}
+	for {
+		var data [1024]byte
+		n, addr, err := listen.ReadFromUDP(data[:]) // 接收数据
+		if err != nil {
+			fmt.Println("read udp failed, err: ", err)
+			continue
+		}
+		fmt.Println("data:%v addr:%v count:%v\n", string(data[:n]), addr, n)
+	}
+
 }

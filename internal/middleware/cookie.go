@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"dataTool/pkg/utils"
+	"dataTool/pkg/auth"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
@@ -22,7 +22,7 @@ func AuthCookieMiddleware() gin.HandlerFunc {
 		key := parts[0]                               // 获取分割后的第一个子串
 		value := parts[1]                             // 获取分割后的第二个子串
 		cookie, err := c.Request.Cookie(key)
-		fmt.Println(utils.CookieDecrypt(key, value))
+		fmt.Println(auth.CookieDecrypt(key, value))
 		//fmt.Println(key, value, "111")
 		if err != nil {
 			c.Abort()

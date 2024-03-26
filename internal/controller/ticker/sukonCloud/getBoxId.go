@@ -3,7 +3,7 @@ package sukonCloud
 import (
 	"dataTool/initialize/global"
 	"dataTool/internal/model"
-	"dataTool/pkg/redis"
+	"dataTool/pkg/redisUtils"
 	"dataTool/pkg/utils"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
@@ -52,7 +52,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 		switch box.Status {
 		case "0":
 			var device model.Device
-			strRedis, err := redis.Redis{}.GetValueHash("rtts", box.BoxId)
+			strRedis, err := redisUtils.Redis{}.GetValueHash("rtts", box.BoxId)
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}
@@ -66,14 +66,14 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}
-			err = redis.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
+			err = redisUtils.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}
 			continue
 		case "1":
 			var device model.Device
-			strRedis, err := redis.Redis{}.GetValueHash("rtts", box.BoxId)
+			strRedis, err := redisUtils.Redis{}.GetValueHash("rtts", box.BoxId)
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}
@@ -87,7 +87,7 @@ func suKonCloudBox(projectId string) { //获取box并且更新box状态
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}
-			err = redis.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
+			err = redisUtils.Redis{}.SetValueHash("rtts", box.BoxId, string(lastDB))
 			if err != nil {
 				logrus.Error("解码失败:", err)
 			}

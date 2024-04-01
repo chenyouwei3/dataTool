@@ -1,7 +1,7 @@
 package rabbitmqUtils
 
 import (
-	"dataTool/initialize/config"
+	"dataTool/initialize/config/system"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
@@ -19,7 +19,7 @@ type RabbitMQ struct {
 
 // NewRabbitMQ 创建结构体实例
 func NewRabbitMQ(queueName string, exchange string, key string) *RabbitMQ {
-	return &RabbitMQ{QueueName: queueName, ExChange: exchange, Key: key, Url: config.Config.Rabbitmq.Url1}
+	return &RabbitMQ{QueueName: queueName, ExChange: exchange, Key: key, Url: system.Config.Rabbitmq.Url1}
 }
 
 // Destroy 断开channel 和 connection

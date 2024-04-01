@@ -30,7 +30,7 @@ func OperationLogMiddleware() gin.HandlerFunc {
 			Errors:    c.Errors.ByType(gin.ErrorTypePrivate).String(),
 		}
 		go func(log OperationLog) {
-			res := global.LogTable.Create(log)
+			res := global.LogTableSlave0.Create(log)
 			if res.Error != nil {
 				logrus.Error("中间件日志记录失败:", res.Error)
 			}

@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"dataTool/initialize/config"
+	"dataTool/initialize/config/system"
 	"dataTool/internal/model"
 	"dataTool/pkg/redisUtils"
 	"errors"
@@ -15,7 +15,7 @@ type CustomClaims struct {
 	jwt.StandardClaims
 }
 
-var SigningKey = []byte(config.Config.Jwt.SignKey)
+var SigningKey = []byte(system.Config.Jwt.SignKey)
 
 func CreateToken(user model.User) (string, error) {
 	//获取token，前两部分
@@ -23,7 +23,7 @@ func CreateToken(user model.User) (string, error) {
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),               //签名生效时间
 			ExpiresAt: time.Now().Unix() + 60*60*24*30, //30添小时过期
-			Issuer:    config.Config.Jwt.Issuer,        //签发人，
+			Issuer:    system.Config.Jwt.Issuer,        //签发人，
 		},
 	})
 	//根据密钥生成加密token，token完整三部分

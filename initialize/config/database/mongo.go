@@ -1,7 +1,8 @@
-package config
+package database
 
 import (
 	"context"
+	"dataTool/initialize/config/system"
 	"dataTool/initialize/global"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -9,7 +10,7 @@ import (
 	"log"
 )
 
-func MongodbInit(config MongodbConfig) {
+func MongodbInit(config system.MongodbConfig) {
 	if global.MongodbClient == nil {
 		global.MongodbClient = getMongoClient(config.Address)
 	}

@@ -1,4 +1,4 @@
-package config
+package socketServer
 
 import (
 	"dataTool/internal/controller"

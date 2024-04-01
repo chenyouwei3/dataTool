@@ -1,5 +1,6 @@
 mysql:
-  Address: root:Cyw123456@tcp(43.138.32.203:3306)/loopyticker?charset=utf8mb4&parseTime=True&loc=Local
+  Address0: root:Cyw123456@tcp(43.138.32.203:3301)/loopy?charset=utf8mb4&parseTime=True&loc=Local
+  Address1: root:Cyw123456@tcp(43.138.32.203:3302)/loopy?charset=utf8mb4&parseTime=True&loc=Local
   SetMaxIdleConns: 10
   SetMaxOpenConns: 10
   SetConnMaxLifetime:	15m
@@ -17,6 +18,12 @@ redis:
   MinIdleConns: 5
 
 jwt:
-  SignKey:
+  SignKey: cyw
   ExpireSeconds:
-  Issuer:
+  Issuer: cyw
+
+rabbitmq:
+  Url1: amqp://root:Cyw123456@43.138.32.203:5673/
+  Url2:
+  Url3:
+  Url4:

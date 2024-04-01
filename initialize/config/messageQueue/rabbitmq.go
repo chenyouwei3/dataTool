@@ -1,4 +1,4 @@
-package config
+package messageQueue
 
 import (
 	"dataTool/initialize/global"

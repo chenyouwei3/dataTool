@@ -1,15 +1,19 @@
 package initialize
 
-import "dataTool/initialize/config"
+import (
+	"dataTool/initialize/config/database"
+	"dataTool/initialize/config/messageQueue"
+	"dataTool/initialize/config/socketServer"
+	"dataTool/initialize/config/system"
+)
 
 func InitConfig() {
-	config.MongodbInit(*config.Config.Mongodb)
-	config.MysqlInit(*config.Config.Mysql)
-	config.RedisInit(*config.Config.Redis)
-	config.RabbitmqInit()
-
-	config.SnowFlakeInit()
-	config.LogInit()
-	config.SocketServerStart()
+	database.MongodbInit(*system.Config.Mongodb)
+	database.MysqlInit(*system.Config.Mysql)
+	database.RedisInit(*system.Config.Redis)
+	messageQueue.RabbitmqInit()
+	system.SnowFlakeInit()
+	system.LogInit()
+	socketServer.SocketServerStart()
 
 }
